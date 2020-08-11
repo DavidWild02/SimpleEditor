@@ -1,0 +1,102 @@
+﻿<Window x:Class="SimpleEditor.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SimpleEditor"
+        mc:Ignorable="d"
+        Title="SimpleEditor" Height="400" Width="550">
+    <Window.Resources>
+        <local:BoolToVisConverter x:Key="BoolToVisConverter"/>
+    </Window.Resources>
+    <Window.CommandBindings>
+        <CommandBinding Command="local:FileCommands.OpenFile" Executed="execute_open_file"/>
+        <CommandBinding Command="local:FileCommands.OpenDirectory" Executed="execute_open_directory"/>
+        <CommandBinding Command="ApplicationCommands.Save" Executed="execute_save" CanExecute="canexecute_save" x:Name="SaveCommand"/>
+        <CommandBinding Command="ApplicationCommands.SaveAs" Executed="execute_save_as" CanExecute="canexecute_tab_selected" x:Name="SaveAsCommand"/>
+        <CommandBinding Command="local:FileCommands.SaveAll" Executed="execute_save_all" x:Name="SaveAllCommand"/>
+        <CommandBinding Command="ApplicationCommands.Close" Executed="execute_close" CanExecute="canexecute_tab_selected" x:Name="CloseCommand"/>
+        <CommandBinding Command="local:FileCommands.CloseAll" Executed="execute_close_all"/>
+    </Window.CommandBindings>
+    <DockPanel>
+        <Menu DockPanel.Dock="Top"  Name="menu">
+            <MenuItem Header="Datei">
+                <MenuItem Header="Neu" Click="click_new_file"/>
+                <MenuItem Header="Öffnen">
+                    <MenuItem Command="local:FileCommands.OpenFile"/>
+                    <MenuItem Command="local:FileCommands.OpenDirectory"/>
+                </MenuItem>
+                <Separator/>
+                <MenuItem Command="ApplicationCommands.Save"/>
+                <MenuItem Command="ApplicationCommands.SaveAs"/>
+                <MenuItem Command="local:FileCommands.SaveAll"/>
+                <Separator/>
+                <MenuItem Command="ApplicationCommands.Close"/>
+                <MenuItem Command="local:FileCommands.CloseAll"/>
+            </MenuItem>
+            <MenuItem Header="Bearbeiten">
+
+            </MenuItem>
+            <MenuItem Header="Ansicht">
+
+            </MenuItem>
+            <MenuItem Header="Settings">
+                <MenuItem Header="Themes"></MenuItem>
+            </MenuItem>
+        </Menu>
+        <ToolBar DockPanel.Dock="Top" Name="toolBar"></ToolBar>
+        <Grid DockPanel.Dock="Top">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" MinWidth="23" Name="explorerColumn"/>
+                <ColumnDefinition Width="5"/>
+                <ColumnDefinition Width="3*" Name="openTabsColumn"/>
+            </Grid.ColumnDefinitions>
+            <Expander Grid.Column="0" Name="Expander" ExpandDirection="Right" IsExpanded="True" Collapsed="collapsed_expander" Expanded="expanded_expander">
+                <DockPanel HorizontalAlignment="Stretch">
+                    <TextBlock DockPanel.Dock="Top">Explorer</TextBlock>
+                    <ScrollViewer VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Hidden">
+                        <TreeView Name="folderView" SelectedItemChanged="open_file_in_editor">
+                            <TreeView.Resources>
+                                <HierarchicalDataTemplate DataType="{x:Type local:FolderItem}" ItemsSource="{Binding Children}">
+                                    <TextBlock Text="{Binding FolderName}" ToolTip="{Binding Path}"></TextBlock>
+                                </HierarchicalDataTemplate>
+                                <DataTemplate DataType="{x:Type local:FileItem}">
+                                    <TextBlock Text="{Binding FileName}" ToolTip="{Binding Path}"></TextBlock>
+                                </DataTemplate>
+                            </TreeView.Resources>
+                        </TreeView>
+                    </ScrollViewer>
+                </DockPanel>
+            </Expander>
+            <GridSplitter Grid.Column="1" 
+                              Background="DimGray" 
+                              Width="5" 
+                              HorizontalAlignment="Center" 
+                              VerticalAlignment="Stretch" 
+                              ShowsPreview="True"
+                              ResizeBehavior="PreviousAndNext"
+                              ResizeDirection="Columns"
+                              Visibility="{Binding ElementName=Expander, Path=IsExpanded, Converter={StaticResource BoolToVisConverter}}"
+                              />
+            <TabControl Grid.Column="2" Name="navBar">
+                <TabControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type local:FileItem}">
+                        <DockPanel>
+                            <TextBlock DockPanel.Dock="Left" Text="{Binding FileName}"></TextBlock>
+                            <Button DockPanel.Dock="Right" Width="25" HorizontalAlignment="Right" BorderThickness="0" Click="close_tab">
+                                X
+                            </Button>
+                        </DockPanel>
+                    </DataTemplate>
+                </TabControl.ItemTemplate>
+                <TabControl.ContentTemplate>
+                    <DataTemplate DataType="{x:Type local:FileItem}">
+                        <ScrollViewer VerticalAlignment="Stretch" HorizontalAlignment="Stretch" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible">
+                            <TextBox Text="{Binding Content}"></TextBox>
+                        </ScrollViewer>
+                    </DataTemplate>
+                </TabControl.ContentTemplate>
+            </TabControl>
+        </Grid>
+    </DockPanel>
+</Window>
